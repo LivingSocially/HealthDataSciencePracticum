@@ -1,0 +1,242 @@
+
+#activate needed libraries
+library(vcd)
+library(ggplot2)
+library(plyr)
+library(dplyr)
+library(reshape)
+library(scales)
+library(shiny)
+library(shinyapps)
+library(shinythemes)
+library(lattice)
+library(ggvis)
+library(rcharts)
+library(ggthemes)
+library(RColorBrewer)
+library(plotly)
+library(DescTools)
+library(RColorBrewer)
+library(extrafont)
+library(devtools)
+library(markdown)
+library(extrafont)
+
+
+levels(YRBSSData$Age)
+levels(YRBSSData$Sex)
+levels(YRBSSData$Grade)
+levels(YRBSSData$HowDoYouDescribeYourWGT)
+levels(YRBSSData$WhatAreYouTrying2DoAbtWGT)
+levels(YRBSSData$DidYouFastToLoseWGTPast30)
+levels(YRBSSData$DidYouTakePillsToLoseWGTPast30)
+levels(YRBSSData$DidYouVomitToLoseWGTPast30)
+levels(YRBSSData$PCTWhoDescribeThemselvesOWGT)
+levels(YRBSSData$PCTWhoAreTrying2LoseWGT)
+levels(YRBSSData$PCTWhoFastedPast30Days)
+levels(YRBSSData$PCTWhoTookPillsPast30Days)
+levels(YRBSSData$PCTWhoVomitedPast30Days)
+levels(YRBSSData$PCTWhoAreOWGT)
+levels(YRBSSData$PCTWhoAreOBESE)
+levels(YRBSSData$RaceEth)
+levels(YRBSSData$PCTAtRisk4OWGT)
+
+#Order Variable Levels to accurately reflect numeric coding
+YRBSSData$HowDoYouDescribeYourWGT <- factor(YRBSSData$HowDoYouDescribeYourWGT,
+                                            levels=c("Very underweight", "Slightly underweight", 
+                                                     "About the right weight", "Slightly overweight", "Very overweight"))
+YRBSSData$WhatAreYouTrying2DoAbtWGT <- factor(YRBSSData$WhatAreYouTrying2DoAbtWGT, 
+                          levels=c("Lose weight", "Gain weight", "Stay the same weight", "Not trying to do anything"))
+
+YRBSSData$Grade <- factor(YRBSSData$Grade , levels=c("9th grade", "10th grade", "11th grade", "12th grade", "Ungraded or other grade"))
+YRBSSData$Sex <- factor(YRBSSData$Sex, levels=c("Female","Male"))
+YRBSSData$DidYouFastToLoseWGTPast30 <-factor(YRBSSData$DidYouFastToLoseWGTPast30 , levels=c("Yes","No"))
+YRBSSData$DidYouTakePillsToLoseWGTPast30 <-factor(YRBSSData$DidYouTakePillsToLoseWGTPast30 , levels=c("Yes","No"))
+YRBSSData$DidYouVomitToLoseWGTPast30 <-factor(YRBSSData$DidYouVomitToLoseWGTPast30 , levels=c("Yes","No"))
+YRBSSData$PCTWhoDescribeThemselvesOWGT <-factor(YRBSSData$PCTWhoDescribeThemselvesOWGT , levels=c("Yes","No"))
+YRBSSData$PCTWhoAreTrying2LoseWGT <-factor(YRBSSData$PCTWhoAreTrying2LoseWGT , levels=c("Yes","No"))
+YRBSSData$PCTWhoFastedPast30Days <-factor(YRBSSData$PCTWhoFastedPast30Days , levels=c("Yes","No"))
+YRBSSData$PCTWhoTookPillsPast30Days <-factor(YRBSSData$PCTWhoTookPillsPast30Days , levels=c("Yes","No"))
+YRBSSData$PCTWhoVomitedPast30Days <- factor(YRBSSData$PCTWhoVomitedPast30Days, levels=c("Yes","No"))
+YRBSSData$PCTWhoAreOWGT <-factor(YRBSSData$PCTWhoAreOWGT , levels=c("Yes","No"))
+YRBSSData$PCTWhoAreOBESE <-factor(YRBSSData$PCTWhoAreOBESE , levels=c("Yes","No"))
+YRBSSData$PCTAtRisk4OWGT <-factor(YRBSSData$PCTAtRisk4OWGT, levels=c("Yes","No"))
+YRBSSData$RaceEth <- factor(YRBSSData$RaceEth , levels=c("Am Indian / Alaska Native", 
+                      "Asian", "Black or African American", "Native Hawaiian/other PI", 
+                      "White", "Hispanic/Latino", "Multiple - Hispanic", "Multiple - Non-Hispanic"))
+
+levels(YRBSSData$Age)
+levels(YRBSSData$Sex)
+levels(YRBSSData$Grade)
+levels(YRBSSData$HowDoYouDescribeYourWGT)
+levels(YRBSSData$WhatAreYouTrying2DoAbtWGT)
+levels(YRBSSData$DidYouFastToLoseWGTPast30)
+levels(YRBSSData$DidYouTakePillsToLoseWGTPast30)
+levels(YRBSSData$DidYouVomitToLoseWGTPast30)
+levels(YRBSSData$PCTWhoDescribeThemselvesOWGT)
+levels(YRBSSData$PCTWhoAreTrying2LoseWGT)
+levels(YRBSSData$PCTWhoFastedPast30Days)
+levels(YRBSSData$PCTWhoTookPillsPast30Days)
+levels(YRBSSData$PCTWhoVomitedPast30Days)
+levels(YRBSSData$PCTWhoAreOWGT)
+levels(YRBSSData$PCTWhoAreOBESE)
+levels(YRBSSData$RaceEth)
+levels(YRBSSData$PCTAtRisk4OWGT)
+
+#Sort data by year, grade level and sex
+YRBSSData [order (YRBSSData$Year, YRBSSData$Grade, YRBSSData$Sex),] 
+
+#Write new CSV data file
+write.csv(YRBSSData, file = "/Users/akebamitchell/Desktop/AbtAssociates_Interview/data/YRBSSData.csv")
+
+#create frequency tables
+#Table of Variable How Do You Describe Your Weight by sex, grade level, and year of survey
+(YRBSSData1 <- structable(Year ~ Sex + Grade + HowDoYouDescribeYourWGT, data = YRBSSData))
+(YRBSSData2 <- structable(Year ~ Sex + Grade + WhatAreYouTrying2DoAbtWGT, data = YRBSSData))
+(YRBSSData3 <- structable(Year ~ Sex + Grade + DidYouFastToLoseWGTPast30, data = YRBSSData))
+(YRBSSData4 <- structable(Year ~ Sex + Grade + DidYouTakePillsToLoseWGTPast30, data = YRBSSData))
+(YRBSSData5 <- structable(Year ~ Sex + Grade + DidYouVomitToLoseWGTPast30, data = YRBSSData))
+
+(YRBSSData6 <- structable(Year ~ Sex + Grade + PCTWhoDescribeThemselvesOWGT, data = YRBSSData))
+(YRBSSData7 <- structable(Year ~ Sex + Grade + PCTWhoAreTrying2LoseWGT, data = YRBSSData))
+(YRBSSData8 <- structable(Year ~ Sex + Grade + PCTWhoFastedPast30Days, data = YRBSSData))
+(YRBSSData9 <- structable(Year ~ Sex + Grade + PCTWhoTookPillsPast30Days, data = YRBSSData))
+(YRBSSData10 <- structable(Year ~ Sex + Grade + PCTWhoVomitedPast30Days, data = YRBSSData))
+(YRBSSData11 <- structable(Year ~ Sex + Grade + PCTWhoAreOWGT, data = YRBSSData))
+(YRBSSData12 <- structable(Year ~ Sex + Grade + PCTWhoAreOBESE, data = YRBSSData))
+(YRBSSData13 <- structable(Year ~ Sex + Grade + PCTAtRisk4OWGT, data = YRBSSData))
+
+#Create dataframe from frequency tables
+HowDoYouDescribeYourWGTdfYRBSS <- as.data.frame(YRBSSData1)
+WhatAreYouTrying2DoAbtWGTdfYRBSS  <- as.data.frame(YRBSSData2)
+DidYouFastToLoseWGTPast30dfYRBSS  <- as.data.frame(YRBSSData3)
+DidYouTakePillsToLoseWGTPast30dfYRBSS  <- as.data.frame(YRBSSData4)
+DidYouVomitToLoseWGTPast30dfYRBSS  <- as.data.frame(YRBSSData5)
+
+PCTWhoDescribeThemselvesOWGTdfYRBSS  <- as.data.frame(YRBSSData6)
+PCTWhoAreTrying2LoseWGTdfYRBSS  <- as.data.frame(YRBSSData7)
+PCTWhoFastedPast30DaysdfYRBSS  <- as.data.frame(YRBSSData8)
+PCTWhoTookPillsPast30DaysdfYRBSS  <- as.data.frame(YRBSSData9)
+PCTWhoVomitedPast30DaysdfYRBSS  <- as.data.frame(YRBSSData10)
+PCTWhoAreOWGTdfYRBSS  <- as.data.frame(YRBSSData11)
+PCTWhoAreOBESEdfYRBSS  <- as.data.frame(YRBSSData12)
+PCTAtRisk4OWGTdfYRBSS <- as.data.frame(YRBSSData13)
+
+# using subset function 
+YRBSSDatadf2001 <- 
+  subset(YRBSSData, Year==2001, 
+         select=c(Age, Sex, Grade, HGT, WGT, HowDoYouDescribeYourWGT,
+                  WhatAreYouTrying2DoAbtWGT, DidYouFastToLoseWGTPast30,
+                  DidYouTakePillsToLoseWGTPast30, DidYouVomitToLoseWGTPast30,
+                  PCTWhoDescribeThemselvesOWGT, PCTWhoAreTrying2LoseWGT, 
+                  PCTWhoFastedPast30Days, PCTWhoTookPillsPast30Days,
+                  PCTWhoVomitedPast30Days, PCTWhoAreOWGT, RaceEth,
+                  PCTWhoAreOBESE, PCTAtRisk4OWGT
+         ))
+YRBSSDatadf2003 <- 
+  subset(YRBSSData, Year==2003, 
+         select=c(Age, Sex, Grade, HGT, WGT, HowDoYouDescribeYourWGT,
+                  WhatAreYouTrying2DoAbtWGT, DidYouFastToLoseWGTPast30,
+                  DidYouTakePillsToLoseWGTPast30, DidYouVomitToLoseWGTPast30,
+                  PCTWhoDescribeThemselvesOWGT, PCTWhoAreTrying2LoseWGT, 
+                  PCTWhoFastedPast30Days, PCTWhoTookPillsPast30Days,
+                  PCTWhoVomitedPast30Days, PCTWhoAreOWGT, RaceEth,
+                  PCTWhoAreOBESE, PCTAtRisk4OWGT
+         ))
+YRBSSDatadf2005 <- 
+  subset(YRBSSData, Year==2005, 
+         select=c(Age, Sex, Grade, HGT, WGT, HowDoYouDescribeYourWGT,
+                  WhatAreYouTrying2DoAbtWGT, DidYouFastToLoseWGTPast30,
+                  DidYouTakePillsToLoseWGTPast30, DidYouVomitToLoseWGTPast30,
+                  PCTWhoDescribeThemselvesOWGT, PCTWhoAreTrying2LoseWGT, 
+                  PCTWhoFastedPast30Days, PCTWhoTookPillsPast30Days,
+                  PCTWhoVomitedPast30Days, PCTWhoAreOWGT, RaceEth,
+                  PCTWhoAreOBESE, PCTAtRisk4OWGT
+         ))
+
+YRBSSDatadf2007 <- 
+  subset(YRBSSData, Year==2007, 
+         select=c(Age, Sex, Grade, HGT, WGT, HowDoYouDescribeYourWGT,
+                  WhatAreYouTrying2DoAbtWGT, DidYouFastToLoseWGTPast30,
+                  DidYouTakePillsToLoseWGTPast30, DidYouVomitToLoseWGTPast30,
+                  PCTWhoDescribeThemselvesOWGT, PCTWhoAreTrying2LoseWGT, 
+                  PCTWhoFastedPast30Days, PCTWhoTookPillsPast30Days,
+                  PCTWhoVomitedPast30Days, PCTWhoAreOWGT, RaceEth,
+                  PCTWhoAreOBESE, PCTAtRisk4OWGT
+         ))
+YRBSSDatadf2009 <- 
+  subset(YRBSSData, Year==2009, 
+         select=c(Age, Sex, Grade, HGT, WGT, HowDoYouDescribeYourWGT,
+                  WhatAreYouTrying2DoAbtWGT, DidYouFastToLoseWGTPast30,
+                  DidYouTakePillsToLoseWGTPast30, DidYouVomitToLoseWGTPast30,
+                  PCTWhoDescribeThemselvesOWGT, PCTWhoAreTrying2LoseWGT, 
+                  PCTWhoFastedPast30Days, PCTWhoTookPillsPast30Days,
+                  PCTWhoVomitedPast30Days, PCTWhoAreOWGT, RaceEth,
+                  PCTWhoAreOBESE, PCTAtRisk4OWGT
+         ))
+YRBSSDatadf2011 <- 
+  subset(YRBSSData, Year==2011, 
+         select=c(Age, Sex, Grade, HGT, WGT, HowDoYouDescribeYourWGT,
+                  WhatAreYouTrying2DoAbtWGT, DidYouFastToLoseWGTPast30,
+                  DidYouTakePillsToLoseWGTPast30, DidYouVomitToLoseWGTPast30,
+                  PCTWhoDescribeThemselvesOWGT, PCTWhoAreTrying2LoseWGT, 
+                  PCTWhoFastedPast30Days, PCTWhoTookPillsPast30Days,
+                  PCTWhoVomitedPast30Days, PCTWhoAreOWGT, RaceEth,
+                  PCTWhoAreOBESE, PCTAtRisk4OWGT
+         ))
+YRBSSDatadf2013 <- 
+  subset(YRBSSData, Year==2013, 
+         select=c(Age, Sex, Grade, HGT, WGT, HowDoYouDescribeYourWGT,
+                  WhatAreYouTrying2DoAbtWGT, DidYouFastToLoseWGTPast30,
+                  DidYouTakePillsToLoseWGTPast30, DidYouVomitToLoseWGTPast30,
+                  PCTWhoDescribeThemselvesOWGT, PCTWhoAreTrying2LoseWGT, 
+                  PCTWhoFastedPast30Days, PCTWhoTookPillsPast30Days,
+                  PCTWhoVomitedPast30Days, PCTWhoAreOWGT, RaceEth,
+                  PCTWhoAreOBESE, PCTAtRisk4OWGT
+         ))
+
+#Write new CSV data file
+write.csv(YRBSSDatadf2001, file = "/Users/akebamitchell/Desktop/ShinyWebAppDemo/data/YRBSSDatadf2001.csv")
+write.csv(YRBSSDatadf2003, file = "/Users/akebamitchell/Desktop/ShinyWebAppDemo/data/YRBSSDatadf2003.csv")
+write.csv(YRBSSDatadf2005, file = "/Users/akebamitchell/Desktop/ShinyWebAppDemo/data/YRBSSDatadf2005.csv")
+write.csv(YRBSSDatadf2007, file = "/Users/akebamitchell/Desktop/ShinyWebAppDemo/data/YRBSSDatadf2007.csv")
+write.csv(YRBSSDatadf2009, file = "/Users/akebamitchell/Desktop/ShinyWebAppDemo/data/YRBSSDatadf2009.csv")
+write.csv(YRBSSDatadf2011, file = "/Users/akebamitchell/Desktop/ShinyWebAppDemo/data/YRBSSDatadf2011.csv")
+write.csv(YRBSSDatadf2013, file = "/Users/akebamitchell/Desktop/ShinyWebAppDemo/data/YRBSSDatadf2013.csv")
+
+
+#How Do You Describe Your Weight? - Very Underweight 2001-2013
+VeryUnderweight <- subset(HowDoYouDescribeYourWGTdfYRBSS, 
+                                  HowDoYouDescribeYourWGT=='Very underweight', 
+                                  select=c(Sex, Grade, HowDoYouDescribeYourWGT, Year, Freq))
+#How Do You Describe Your Weight? - Very Underweight 2001-2013
+VeryUnderweight <- subset(HowDoYouDescribeYourWGTdfYRBSS, 
+                          HowDoYouDescribeYourWGT=='Very underweight', 
+                          select=c(Sex, Grade, HowDoYouDescribeYourWGT, Year, Freq))
+
+#Dotplot by Grade Level and Sex
+ggplot(VeryUnderweight, aes(x=Year, y=Freq, colour=Grade)) +
+  geom_point(aes(shape=Grade), size=4) + scale_shape(solid = TRUE) + 
+    facet_grid(Grade ~ Sex) + 
+  ggtitle("Students Who Described Their Weight As VERY UNDERWEIGHT by Sex and Survey Year") +
+  labs(x="Year of Survey", y="Number of Students") +
+  theme_bw() + 
+  theme(panel.grid.major.x = element_line(colour="grey60", linetype="dashed")) +
+  theme(text=element_text(size=16, family="Trebuchet MS")) +
+  theme(plot.title = element_text(family = "Trebuchet MS", 
+                                  color="#666666", face="bold", 
+                                  size=20, hjust=.5, vjust =.5  )) + 
+  theme(axis.title = element_text(family = "Trebuchet MS", 
+                                  color="#666666", face="bold", size=14)) + 
+  theme(strip.background = element_rect(fill="#B0E0E6"),
+      strip.text.x = element_text(size=12 ),
+      strip.text.y = element_text(size=12, angle=-90 ))
+
+#DotPlot Grouped By Sex, with lines that stop at the point
+ggplot(VeryUnderweight, aes(x=Freq, y=Year)) +
+  geom_segment(aes(yend=Year), xend=0, colour="grey50") +
+  geom_point(size=3, aes(colour=Sex)) +
+  scale_colour_brewer(palette="Set1", limits=c("Male","Female"), guide=FALSE) +
+  theme_bw() +
+  theme(panel.grid.major.y = element_blank()) +
+  facet_grid(Grade ~ Sex, scales="free_y", space="free_y")
